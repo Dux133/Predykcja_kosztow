@@ -36,7 +36,7 @@ summary(model)
 ```
 ```{r}
 df %>%
-  mutate(wydatki = log(wydatki),
+  mutate(wydatki = log(wydatki + 1),
          palacz_bmi = palacz * bmi,
          bmi_sqrt = bmi ^ 2) -> df
 df
