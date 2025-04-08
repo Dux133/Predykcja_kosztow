@@ -45,6 +45,7 @@ df
 
 # 2. Podział danych na zbiór treningowy i testowy: ------------------------
 ```{r}
+set.seed(123)  # dla reprodukowalności
 sample_index <- sample(1:nrow(df), size = 0.8 * nrow(df))
 # sample_index to 80% indeksów z całego zbioru
 train_data <- df[sample_index,] # Zbiór treningowy czyli 80% indeksów
@@ -75,5 +76,15 @@ porownanie <- data.frame(
   real = round(test_data$wydatki, 1),
   prognoza = predictions)
 print(porownanie)
+```
+
+# 6. Obliczenie metryk
+```{r}
+
+rmse <- sqrt(mean((porownanie$real - porownanie$prognoza)^2))
+r_squared <- summary(modlin)$r.squared
+
+print(paste("RMSE:", round(rmse, 2)))
+print(paste("R-squared:", round(r_squared, 2)))
 ```
 
