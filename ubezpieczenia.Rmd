@@ -1,0 +1,79 @@
+---
+title: "ubezpieczenia regresja"
+author: "DW"
+date: "2025-04-08"
+output: html_document
+---
+# 1. Wczytanie danych i podstawowa eksploracja: ---------------------------
+```{r}
+library(ggplot2)
+library(corrplot)
+library(dplyr)
+df1 <- read.csv("D:\\R\\ubezpieczenia\\insurance.csv",sep = ",")
+head(df1)
+df <- data.frame(wiek = df1$age, bmi = df1$bmi, 
+                 dzieci = df1$children, wydatki = df1$charges,
+                 palacz = ifelse(df1$smoker == "yes", 1, 0), 
+                 plec = ifelse(df1$sex == "male", 0, 1))
+
+df
+ 
+```
+```{r}
+boxplot(df$wiek)
+boxplot(df$wydatki)
+hist(df$wiek)
+hist(df$bmi)
+
+```
+```{r}
+matryca <- cor(df)
+corrplot(matryca)
+```
+```{r}
+model <- lm(wydatki ~ ., data = df)
+summary(model)
+```
+```{r}
+df %>%
+  mutate(wydatki = log(wydatki),
+         palacz_bmi = palacz * bmi,
+         bmi_sqrt = bmi ^ 2) -> df
+df
+
+```
+
+# 2. Podział danych na zbiór treningowy i testowy: ------------------------
+```{r}
+sample_index <- sample(1:nrow(df), size = 0.8 * nrow(df))
+# sample_index to 80% indeksów z całego zbioru
+train_data <- df[sample_index,] # Zbiór treningowy czyli 80% indeksów
+test_data <- df[-sample_index,] # Zbiór testowy ("-" oznacza pozostałe
+# indeksy czyli 20% pozostałych indeksów z całości )
+```
+
+# 3. Budowa modelu regresji liniowej:  ------------------------------------
+```{r}
+# Użyjemy modelu regresji
+# liniowej do przewidywania kosztów leczenia na podstawie
+# danych (wiek, bmi, dzieci, palacz, płeć)
+
+# Budowa modelu -----------------------------------------------------------
+modlin <- lm( wydatki ~ ., data = train_data)
+summary(modlin)
+```
+# 4. Predykcja za pomocą funkcji predict(): -------------------------------
+```{r}
+# Użyjemy modelu aby przewidzieć koszty dla danych testowych
+predictions <- round(predict(modlin, newdata = test_data),1)
+# Wyświetlenie pierwszych kilku wyników
+head(predictions)
+```
+# 5. Teraz porónamy przewidywania przez model z rzeczywistymi wart --------
+```{r}
+porownanie <- data.frame(
+  real = round(test_data$wydatki, 1),
+  prognoza = predictions)
+print(porownanie)
+```
+
